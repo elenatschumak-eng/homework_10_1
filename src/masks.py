@@ -12,7 +12,7 @@ def get_mask_card_number(card_number: int) -> str:
 
     masked_card_str = card_str[:6] + ("*" * 6) + card_str[-4:]
 
-    return " ".join(masked_card_str[i : i + 4] for i in range(0, len(masked_card_str), 4))
+    return " ".join(masked_card_str[i: i + 4] for i in range(0, len(masked_card_str), 4))
 
 
 def get_mask_account(account_number: int | str) -> str:

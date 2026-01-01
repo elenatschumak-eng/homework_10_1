@@ -5,7 +5,7 @@ from src.masks import get_mask_card_number
 
 
 def mask_account_card(input_number: str) -> str:
-    """ Mask a card or account number inside a string. """
+    """Mask a card or account number inside a string."""
     proved_input_number = input_number.strip()
     if not proved_input_number:
         raise ValueError("Input is empty.")
@@ -32,15 +32,10 @@ def mask_account_card(input_number: str) -> str:
 
 
 def get_date(value: str) -> str:
-    """ Convert 'YYYY-MM-DDTHH:MM:SS.ssssss' to 'DD.MM.YYYY' """
+    """Convert 'YYYY-MM-DDTHH:MM:SS.ssssss' to 'DD.MM.YYYY'"""
     try:
         dt = datetime.fromisoformat(value)
     except ValueError as exc:
         raise ValueError("Invalid date format.") from exc
 
     return dt.strftime("%d.%m.%Y")
-
-
-
-
-
