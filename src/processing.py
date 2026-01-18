@@ -2,7 +2,7 @@ from typing import Any
 
 
 def filter_by_state(operations: list[dict[str, Any]], state: str = "EXECUTED") -> list[dict[str, Any]]:
-    """    Filter a list of operations by the value of the 'state' key.
+    """Filter a list of operations by the value of the 'state' key.
 
     Args:
         operations: List of dictionaries with operation data.
@@ -29,4 +29,3 @@ def sort_by_date(operations: list[dict[str, Any]], reverse: bool = True) -> list
         A new list sorted by the 'date' key.
     """
     return sorted(operations, key=lambda op: op.get("date", ""), reverse=reverse)
-
