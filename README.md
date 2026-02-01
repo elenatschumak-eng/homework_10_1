@@ -142,3 +142,10 @@ poetry run pytest
 * `feature/*`: development branches for each task
 
 Work is done in a `feature/...` branch and then merged into `develop` via a Pull Request.
+
+## Testing
+
+Run unit tests:
+
+```bash
+poetry run pytest
