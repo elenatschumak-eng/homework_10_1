@@ -82,8 +82,8 @@ def convert_to_rub(transaction: dict[str, Any]) -> float:
         raise RuntimeError("Missing APILAYER_API_KEY in environment.")
 
     url = "https://api.apilayer.com/exchangerates_data/convert"
-    headers = {"apikey": api_key}
-    params = {"from": code, "to": "RUB", "amount": amount}
+    headers: dict[str, str] = {"apikey": api_key}
+    params: dict[str, str | float] = {"from": code, "to": "RUB", "amount": amount,}
 
     logger.info("Requesting conversion %s -> RUB for amount=%s", code, amount)
 
