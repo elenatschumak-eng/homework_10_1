@@ -1,175 +1,140 @@
-# SkyPro Python — Homework 11.1 (GitFlow + Processing + Generators + Tests)
+# SkyPro Python — Homework 13.1 (CSV + XLSX Readers)
 
-This repository contains an educational Python project for practicing **Git/GitHub workflow (GitFlow)**, implementing **data processing utilities** (including **generators**), and writing **pytest** tests with **coverage reports**.
+This repository is an educational Python project for practicing **Git/GitHub workflow (GitFlow)** and implementing small utilities for working with banking transactions.
 
-## Project goals
+The new functionality in this part (Homework 13.1) adds reading transactions from **CSV** and **Excel (XLSX)** files and returning them in a unified format: `list[dict]`.
 
-- Practice GitFlow workflow (`main`, `develop`, `feature/*`) and submit work via **Pull Requests** into `develop`.
-- Implement reusable Python functions for filtering and sorting operation/transaction data.
-- Implement generator-based utilities (`yield`) for efficient processing of transaction lists.
-- Write tests using **pytest**, use fixtures/parametrization, and achieve **≥ 80%** test coverage.
-- Keep code quality with **PEP 8**, **flake8**, and **mypy**.
+---
+
+## Project Goals
+
+- Practice GitFlow workflow (`main`, `develop`, `feature/*`) and submitting work via Pull Requests into `develop`.
+- Add readers for transaction data from **CSV** and **XLSX** files.
+- Ensure stable behavior: on missing/empty/invalid files the readers return an empty list `[]` instead of crashing.
+- Maintain code quality (PEP 8, docstrings, type hints) and run linters/tests.
+
+---
 
 ## Requirements
 
-- Python (recommended: the same version used in the course)
+- Python (course version)
 - Poetry
+
+Project dependencies are managed via Poetry and include:
+- `pandas` (for CSV/XLSX parsing)
+- `openpyxl` (Excel engine, used by pandas)
+
+---
 
 ## Installation
 
-1) Clone the repository:
-
-```bash
+~~~bash
 git clone <REPO_URL>
 cd <REPO_FOLDER>
-```
-
-2) Install dependencies:
-
-```bash
 poetry install
-```
+~~~
 
-3) Activate the virtual environment (optional):
-
-```bash
+(Optional) Activate venv:
+~~~bash
 poetry shell
-```
+~~~
 
-## Project structure
+---
 
-```text
+## Project Structure (relevant parts)
+
+~~~text
+data/
+  operations.json
+  transactions.csv
+  transactions_excel.xlsx
+
 src/
-  processing.py    # filtering/sorting of operations
-  generators.py    # generators for transaction processing (Homework 11.1)
-  masks.py         # masking utilities (previous homework)
-  widget.py        # widget functions (previous homework)
+  data_readers.py      # Homework 13.1: CSV/XLSX readers
+  utils.py             # JSON loader from previous homework parts
+  processing.py        # filtering/sorting utilities
+  generators.py        # generator utilities
+  masks.py             # masking utilities
+  widget.py            # widget utilities
+  external_api.py      # currency conversion (API)
 
 tests/
-  test_processing.py
-  test_masks.py
-  test_widget.py
-  test_generators.py
+  test_data_readers.py
+  ... other tests
+~~~
 
-htmlcov/           # HTML coverage report (generated)
-.coverage          # coverage data file (generated)
-pyproject.toml
-README.md
-```
+---
 
-## Usage
+## New Functionality (Homework 13.1): Reading CSV and Excel
 
-### `filter_by_state` (module: `src/processing.py`)
+### `read_transactions_csv(path)`
 
-Filters a list of operation dictionaries and returns only those operations whose `"state"` equals the provided state.
-`state` is optional and defaults to `"EXECUTED"`.
+Reads transactions from a CSV file and returns `list[dict[str, Any]]`.
 
-```python
-from src.processing import filter_by_state
+Key points:
+- `path` is a filesystem path (string or `Path`)
+- If the file is **missing**, **empty**, or cannot be parsed, the function returns `[]`
+- In the provided dataset the separator is `;` (semicolon)
 
-ops = [
-    {"id": 1, "state": "EXECUTED", "date": "2019-07-03T18:35:29.512364"},
-    {"id": 2, "state": "CANCELED", "date": "2018-06-30T02:08:58.425572"},
-]
+Example:
+~~~python
+from src.data_readers import read_transactions_csv
 
-print(filter_by_state(ops))                # default state="EXECUTED"
-print(filter_by_state(ops, "CANCELED"))    # explicit state
-```
+transactions = read_transactions_csv("data/transactions.csv")
+print(len(transactions))
+print(transactions[0])
+~~~
 
-### `sort_by_date` (module: `src/processing.py`)
+---
 
-Sorts a list of operation dictionaries by `"date"` and returns a new sorted list.
-`reverse` is optional and defaults to `True` (newest first).
+### `read_transactions_excel(path, sheet_name=0)`
 
-```python
-from src.processing import sort_by_date
+Reads transactions from an Excel `.xlsx` file and returns `list[dict[str, Any]]`.
 
-ops = [
-    {"id": 1, "date": "2019-07-03T18:35:29.512364"},
-    {"id": 2, "date": "2018-06-30T02:08:58.425572"},
-]
+Key points:
+- `path` is a filesystem path (string or `Path`)
+- `sheet_name` may be a sheet index (default `0`) or a sheet name
+- If the file is **missing**, **empty**, or cannot be parsed, the function returns `[]`
 
-print(sort_by_date(ops))                 # descending by default
-print(sort_by_date(ops, reverse=False))  # ascending
-```
+Example:
+~~~python
+from src.data_readers import read_transactions_excel
 
-### `filter_by_currency` (module: `src/generators.py`)
+transactions = read_transactions_excel("data/transactions_excel.xlsx")
+print(len(transactions))
+print(transactions[0])
+~~~
 
-Returns an iterator/generator that yields only transactions whose currency code matches the requested one (e.g., `"USD"`).
+---
 
-```python
-from src.generators import filter_by_currency
+## Running Tests and Linters
 
-usd_transactions = filter_by_currency(transactions, "USD")
-print(next(usd_transactions))
-print(next(usd_transactions))
-```
-
-### `transaction_descriptions` (module: `src/generators.py`)
-
-Generator that yields each transaction `"description"` one by one.
-
-```python
-from src.generators import transaction_descriptions
-
-descriptions = transaction_descriptions(transactions)
-print(next(descriptions))
-print(next(descriptions))
-```
-
-### `card_number_generator` (module: `src/generators.py`)
-
-Generator that yields card numbers in the format `XXXX XXXX XXXX XXXX` for a given numeric range.
-
-```python
-from src.generators import card_number_generator
-
-for card in card_number_generator(1, 5):
-    print(card)
-# 0000 0000 0000 0001
-# 0000 0000 0000 0002
-# 0000 0000 0000 0003
-# 0000 0000 0000 0004
-# 0000 0000 0000 0005
-```
-
-## Testing and quality checks
-
-### Run tests
-
-```bash
+Run all tests:
+~~~bash
 poetry run pytest
-```
+~~~
 
-### Run flake8
-
-```bash
-poetry run flake8
-```
-
-### Run mypy
-
-```bash
-poetry run mypy src
-```
-
-### Run tests with coverage (terminal + HTML report)
-
-```bash
+Run coverage (optional):
+~~~bash
 poetry run pytest --cov=src --cov-report=term-missing --cov-report=html
-```
+~~~
 
-After that, open the HTML report:
+Run flake8:
+~~~bash
+poetry run flake8
+~~~
 
-- Windows (PowerShell):
-  ```powershell
-  start htmlcov\index.html
-  ```
+(Optional) Run mypy:
+~~~bash
+poetry run mypy src
+~~~
 
-## GitFlow workflow (short)
+---
+
+## GitFlow (Short Overview)
 
 - `main`: stable branch
 - `develop`: integration branch
-- `feature/*`: development branches for each task
+- `feature/*`: development branches for each homework part
 
-Work is done in a `feature/...` branch and then merged into `develop` via a Pull Request.
+Work is done in a `feature/...` branch and merged into `develop` via a Pull Request.
