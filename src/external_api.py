@@ -83,7 +83,7 @@ def convert_to_rub(transaction: dict[str, Any]) -> float:
 
     url = "https://api.apilayer.com/exchangerates_data/convert"
     headers: dict[str, str] = {"apikey": api_key}
-    params: dict[str, str | float] = {"from": code, "to": "RUB", "amount": amount,}
+    params: dict[str, str | float] = {"from": code, "to": "RUB", "amount": amount, }
 
     logger.info("Requesting conversion %s -> RUB for amount=%s", code, amount)
 

@@ -4,7 +4,6 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pandas as pd
-import pytest
 
 from src.data_readers import read_transactions_csv, read_transactions_excel
 
@@ -33,8 +32,7 @@ def test_read_transactions_csv_ok_returns_records(mock_read_csv, tmp_path: Path)
 
     assert result == [{"id": 1, "amount": "10.00"}, {"id": 2, "amount": "20.00"}]
     mock_read_csv.assert_called_once()
-    # Optional streng: falls du sep=";" nutzt, lass diese Zeile drin.
-    # Wenn deine Implementierung keinen sep setzt, sag mir kurz Bescheid, dann passe ich den Test an.
+
     assert mock_read_csv.call_args.kwargs.get("sep") in (";", None)
 
 
