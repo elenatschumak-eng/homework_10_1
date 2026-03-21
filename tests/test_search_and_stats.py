@@ -1,51 +1,42 @@
-from __future__ import annotations
-
-from typing import Any
-
 import pytest
 
 from src.search_and_stats import process_bank_operations, process_bank_search
 
 
 @pytest.fixture()
-def operations() -> list[dict[str, Any]]:
+def operations() -> list[dict]:
+    # Kleine, kontrollierte Beispieldaten für stabile Tests
     return [
-        {"id": 1, "description": "Перевод организации"},
+        {"id": 1, "description": "Открытие вклада"},
         {"id": 2, "description": "Перевод со счета на счет"},
-        {"id": 3, "description": "Открытие вклада"},
-        {"id": 4, "description": "Перевод с карты на карту"},
-        {"id": 5, "description": "перевод организации"},  # absichtlich andere Groß-/Kleinschreibung
-        {"id": 6},  # keine description
-        {"id": 7, "description": None},  # falscher Typ
+        {"id": 3, "description": "Перевод с карты на карту"},
+        {"id": 4, "description": None},   # kein String -> muss ignoriert werden
+        {"id": 5},                        # kein description -> muss ignoriert werden
     ]
 
 
 @pytest.mark.parametrize(
-    ("search", "expected_ids"),
+    ("query", "expected_ids"),
     [
-        ("перевод", [1, 2, 4, 5]),
-        ("ОРГАНИЗАЦИИ", [1, 5]),
-        ("вклада", [3]),
-        ("не найдено", []),
-        ("", []),
+        ("перевод", [2, 3]),   # case-insensitive Suche
+        ("ВКЛАД", [1]),
+        ("", []),              # leere Suche -> leere Liste
     ],
 )
-def test_process_bank_search(operations: list[dict[str, Any]], search: str, expected_ids: list[int]) -> None:
-    result = process_bank_search(operations, search)
+def test_process_bank_search(operations: list[dict], query: str, expected_ids: list[int]) -> None:
+    result = process_bank_search(operations, query)
     assert [item["id"] for item in result] == expected_ids
 
 
-def test_process_bank_operations_counts(operations: list[dict[str, Any]]) -> None:
-    categories = ["перевод", "вклада", "организации"]
+def test_process_bank_operations_counts(operations: list[dict]) -> None:
+    categories = ["Перевод", "вклад", "Кредит"]
     result = process_bank_operations(operations, categories)
 
-    # перевод: IDs 1,2,4,5 -> 4
-    assert result["перевод"] == 4
-    # вклада: ID 3 -> 1
-    assert result["вклада"] == 1
-    # организации: IDs 1,5 -> 2
-    assert result["организации"] == 2
+    # Keys müssen genau die Kategorien sein, die du übergibst
+    assert result["Перевод"] == 2
+    assert result["вклад"] == 1
+    assert result["Кредит"] == 0
 
 
-def test_process_bank_operations_empty_categories(operations: list[dict[str, Any]]) -> None:
+def test_process_bank_operations_empty_categories(operations: list[dict]) -> None:
     assert process_bank_operations(operations, []) == {}
