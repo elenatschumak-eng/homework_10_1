@@ -138,3 +138,80 @@ poetry run mypy src
 - `feature/*`: development branches for each homework part
 
 Work is done in a `feature/...` branch and merged into `develop` via a Pull Request.
+
+---
+
+## New Functionality (Homework 13.2): `re`, `collections.Counter`, and `main()`
+
+In Homework 13.2 the project is extended with:
+- Searching transactions by a substring in the `description` field using **regular expressions** (`re`)
+- Counting how many transactions match each requested category using **`collections.Counter`**
+- A `main()` entry point that connects the functionality and provides a simple CLI flow
+
+### Search in descriptions with `re`
+
+Module: `src/search_and_stats.py`  
+Function: `process_bank_search(data, search)`
+
+What it does:
+- Takes a list of transaction dictionaries (`data`) and a search string (`search`)
+- Uses `re` to find transactions where the `description` contains the search text (case-insensitive)
+- Returns a list of matching transactions
+- If `search` is empty, returns an empty list `[]`
+
+Example:
+~~~python
+from src.search_and_stats import process_bank_search
+
+ops = [
+    {"id": 1, "description": "Перевод со счета на счет"},
+    {"id": 2, "description": "Открытие вклада"},
+]
+print(process_bank_search(ops, "вклад"))
+# -> [{"id": 2, "description": "Открытие вклада"}]
+~~~
+
+---
+
+### Count categories with `collections.Counter`
+
+Module: `src/search_and_stats.py`  
+Function: `process_bank_operations(data, categories)`
+
+What it does:
+- Takes a list of transaction dictionaries (`data`) and a list of category strings (`categories`)
+- Looks for each category as a substring match in `description` (case-insensitive)
+- Uses `Counter` to calculate counts
+- Returns a dictionary in the format `{category: count}`
+- If `categories` is empty, returns `{}`
+
+Example:
+~~~python
+from src.search_and_stats import process_bank_operations
+
+ops = [
+    {"description": "Перевод со счета на счет"},
+    {"description": "Перевод с карты на карту"},
+    {"description": "Открытие вклада"},
+]
+categories = ["Перевод", "вклад", "Кредит"]
+print(process_bank_operations(ops, categories))
+# -> {"Перевод": 2, "вклад": 1, "Кредит": 0}
+~~~
+
+---
+
+### Program entry point (`main.py`)
+
+The `main()` function is implemented in `main.py` (project root).  
+It connects the modules and provides a user-facing workflow:
+- Choose the data source (JSON / CSV / XLSX)
+- Filter by operation status
+- Optional sorting (ascending/descending)
+- Optional RUB-only conversion
+- Optional search by description and category statistics
+
+Run the program:
+~~~bash
+poetry run python main.py
+~~~
