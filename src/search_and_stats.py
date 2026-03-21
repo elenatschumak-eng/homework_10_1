@@ -47,7 +47,7 @@ def process_bank_operations(data: list[dict[str, Any]], categories: list[str]) -
         return {}
 
     patterns = {cat: re.compile(re.escape(cat), re.IGNORECASE) for cat in categories if cat}
-    counter: Counter[str] = Counter()
+    counter: Counter[str] = Counter({cat: 0 for cat in categories if cat})
 
     for op in data:
         desc = op.get("description")
